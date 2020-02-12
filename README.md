@@ -6,7 +6,7 @@
 
 - Description
   
-  ChatAI is a python framework for human dialogue data construction and collection, by which you design your settings serving specific tasks or scenes.
+  ChatAI is a python framework for human dialogue data construction and collection, by which you can design the settings for various open domain or task-oriented dialogue scenes.
   
 - Its goal is to provide to researchers:
 
