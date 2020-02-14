@@ -17,7 +17,7 @@ class Uterrance(models.Model):
 	def __str__(self):
 		return ""
 
-class Conversation(model.Model):
+class Conversation(models.Model):
 	hit = models.ForeignKey(Hit,on_delete=models.CASCADE)
 	utterances = models.OneToOneField(Hit, on_delete=models.CASCADE, primary_key=True)
 	def __str__(self):
