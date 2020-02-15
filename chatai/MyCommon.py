@@ -1,4 +1,6 @@
+
 class MyCommon:
-    glb_room = set((1,2,3,4,5,6,7,8,9,10))
+    glb_path = "ConfigureFile"
+    glb_room = 10
     glb_scene = ["家庭","职业","恋爱","健康","个性","学习","偶发事件"]
     glb_emotion = ["开心","难过","惊讶","厌恶","信赖","恐惧","期待","气愤"]

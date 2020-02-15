@@ -1,0 +1,7 @@
+<p>请登录房间</p>
+<form action="{% url 'chatai:verify' room_id %}" method="post">
+    {% csrf_token %}
+    <p>{{room_id}}号房间密码：<input type="text" name="password" /></p>
+    <p>你的名字：<input type="text" name="name" /></p>
+    <p><input type="submit" value="进入" /></p>
+</form>

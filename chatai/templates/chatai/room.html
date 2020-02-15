@@ -1,0 +1,49 @@
+
+{% if hit.speaker_name is None %}
+    <form action="{% url 'chatai:room' room_id %}" method="post">
+        {% csrf_token %}
+        <p>等待speaker签名：<input type="text" name="speaker_name" /></p>
+        <p>推荐用复杂的英文，目前系统很傻，需要您保证不会撞名字</p>
+        <p><input type="submit" value="下一步listner签名" /></p>
+    </form>
+{%elif hit.listener_name is None %}
+        {% if hit.speaker_name != name %}
+        <form action="{% url 'chatai:room' room_id %}" method="post">
+            {% csrf_token %}
+            <p>如果你已经成为speaker，请不要提交。请找另一个listner进入房间签名。</p>
+            <p>等待listener签名<input type="text" name="listener_name" /></p>
+            <p>推荐用复杂的英文，目前系统很傻，需要您保证不会撞名字</p>
+            <p><input type="submit" value="下一步创造场景" /></p>
+        </form>
+        {%else%}
+        <p>你已经成为speaker。请邀请另一个listner进入房间签名。</p>
+        {%endif%}
+{%elif conv.context is None %}
+        {% if hit.speaker_name == name%}
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        <p>主题：{{conv.scene}}</p>
+        <p>情绪：{{conv.emotion}}</p>
+        <form action="{% url 'chatai:room' room_id %}" method="post">
+            {% csrf_token %}
+            <p>作为speaker，您需要根据主题和情绪，且基于<b>真实经历</b>，创造一个场景。如果这个主题和情绪搭配下，您没有过真实经历，可选择换一组搭配。</p>
+            <p><input type="radio" name="choice" id="choice1" value="0">创造场景:<input type="text" name="context" style="width:1000px;"/></p>
+            <p><input type="radio" name="choice" id="choice2" value="1">换一组搭配</p>
+            <p><input type="submit" value="提交" /></p>
+        </form>
+        {%else%}
+        <p>speaker正在创造场景，请等待，完成后再刷新会出现对话页面。</p>
+        {%endif%}
+{%elif conv.utterances is None %}
+        {% if hit.speaker_name == name %}
+        <p>主题：{{conv.scene}}</p>
+        <p>情绪：{{conv.emotion}}</p>
+        <p>情景：{{conv.context}}</p>
+        <form action="{% url 'chatai:room' room_id %}" method="post">
+            {% csrf_token %}
+            <p>规则：第一句由speaker开始，最后一句由listener说出。如果speaker觉得对话可以结束了，停止回复，并按下结束按钮。对话不少于10句，不多于20句。</p>
+            <p>speaker发言：<input type="text" name="speaker_text" /></p>
+            <p><input type="submit" value="提交" /></p></form>
+        {%endif%}
+
+{%else%}
+{%endif%}
