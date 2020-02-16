@@ -3,22 +3,27 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 from django.views import generic
-from .models import Hit,Conversation
+from .models import Hit,Conversation,Utterance
 import random
 from .MyCommon import *
 from .XmlFileCode import *
 # Create your views here.
 if not XmlCmd.isFileExist(MyCommon.glb_path):
     XmlCmd.createXml(MyCommon.glb_path)
-    a=XmlCmd.writeXml(MyCommon.glb_path,["vacant_room","[6,7,8,9,10]"],"Hit","vacant_room")
+    a=XmlCmd.writeXml(MyCommon.glb_path,["vacant_room","[1,2,3,4,5,6,7,8,9,10]"],"Hit","vacant_room")
 
 def index(request):
     rep = render(request, 'chatai/index.html')
-    rep.set_cookie("login_room", "5", max_age=60 * 60)
-    rep.set_cookie("name", "siyang", max_age=60 * 60)
+    if request.POST.get("room_id",False) and request.POST.get("room_id",False).isdigit():
+        room_id = int(request.POST["room_id"])
+        if room_id >0:
+            rep = redirect(reverse("chatai:login",kwargs={"room_id":room_id}))
     return rep
 
 def register(request):
+    if not XmlCmd.isFileExist(MyCommon.glb_path):
+        XmlCmd.createXml(MyCommon.glb_path)
+        XmlCmd.writeXml(MyCommon.glb_path, ["vacant_room", "[1,2,3,4,5,6,7,8,9,10]"], "Hit", "vacant_room")
     vacant_room = XmlCmd.readXml(MyCommon.glb_path,"Hit","vacant_room")[1]
     cur_room = eval(vacant_room)
     new_hit_id =sorted(cur_room)[0]
@@ -52,7 +57,6 @@ def room(request,room_id):
                 hit.speaker_name = request.POST["speaker_name"]
                 hit.save()
                 rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
-                rep.set_cookie("name", hit.speaker_name, max_age=60 * 60)
         elif hit.listener_name is None:
             print("保存listener_name")
             rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
@@ -61,7 +65,6 @@ def room(request,room_id):
                 hit.listener_name = request.POST["listener_name"]
                 hit.save()
                 rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
-                rep.set_cookie("name", hit.listener_name, max_age=60 * 60)
         elif conv.context is None:
             if name==hit.speaker_name:
                 print("进入阶段2：",request.POST.get("choice",False))
@@ -72,7 +75,7 @@ def room(request,room_id):
                     if request.POST.get("context",False):
                         conv.context = request.POST["context"]
                         conv.save()
-                        rep = render(request, 'chatai/room.html',{"hit": hit, "conv": conv, "room_id": room_id, "name": name})
+                        rep = render(request, 'chatai/room.html',{"hit": hit, "conv": conv, "room_id": room_id, "name": name,"cur_turn":0})
                     else:
                         rep = render(request, 'chatai/room.html',{"hit": hit, "conv": conv, "room_id": room_id, "name": name,'error_message': "你选择创造场景但没有输入文本"})
                 elif request.POST.get("choice",False)=="1":
@@ -83,10 +86,31 @@ def room(request,room_id):
             else:
                 print("打印",hit.listener_name is None ,hit.speaker_name,name)
                 rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
-        elif conv.utterances is None:
-            rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
+        elif name in [hit.speaker_name,hit.listener_name]:
+            if conv.utterances.count()==0:
+                cur_turn = 0
+            else:
+                cur_turn = int(1-conv.utterances.latest("send_time").speaker_idx)
+            if request.POST.get("speaker_text",False) and cur_turn==0:
+                u = Utterance(text=request.POST["speaker_text"],speaker_idx=0)
+                u.save()
+                conv.utterances.add(u)
+                conv.save()
+                rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name,"history":conv.utterances.order_by("send_time"),"cur_turn":int(1-cur_turn),"length":conv.utterances.count()})
+            elif request.POST.get("listener_text",False) and  cur_turn==1:
+                u = Utterance(text=request.POST["listener_text"],speaker_idx=1)
+                u.save()
+                conv.utterances.add(u)
+                conv.save()
+                rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name,"history":conv.utterances.order_by("send_time"),"cur_turn":int(1-cur_turn),"length":conv.utterances.count()})
+            else:
+                rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name,"history":conv.utterances.order_by("send_time"),"cur_turn":cur_turn,"length":conv.utterances.count()})
+        else:
+            rep = redirect(reverse("chatai:login", kwargs={"room_id": room_id}))
     else:
         rep = redirect(reverse("chatai:login",kwargs={"room_id":room_id}))
+    rep.set_cookie("name", name, max_age=60 * 60)
+    rep.set_cookie("login_room", room_id, max_age=60 * 60)
     return rep
 
 def login(request,room_id):
@@ -103,5 +127,24 @@ def verify(request,room_id):
     else:
         rep = redirect(reverse("chatai:login",kwargs={"room_id":room_id}))
     return rep
+def close(request,room_id):
+    print("hehes",request.POST.get("close",False),"haha")
+    hit = get_object_or_404(Hit, hit_number=room_id)
+    name = request.COOKIES.get("name",None)
+    if request.POST.get("close", False)=="1" and hit.speaker_name==name:
+        conv = get_object_or_404(Conversation,pk=hit.current_conv)
+        conv.hit=None
+        conv.save()
+        hit.delete()
+        vacant_room = XmlCmd.readXml(MyCommon.glb_path, "Hit", "vacant_room")[1]
+        cur_room = eval(vacant_room)
+        cur_room = list(set(cur_room + [room_id]))
+        XmlCmd.writeXml(MyCommon.glb_path, ["vacant_room", "[" + ",".join([str(item) for item in cur_room]) + "]"],
+                        "Hit", "vacant_room")
+
+        return render(request,"chatai/close.html",{"result":"对话结束，链接已收回！"})
+    else:
+        return render(request, "chatai/close.html", {"result": "无权限收回对话。如果您觉得有权限，可重新登录试试。"})
+
 
 
