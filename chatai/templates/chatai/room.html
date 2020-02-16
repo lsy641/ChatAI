@@ -1,4 +1,4 @@
-
+{% load staticfiles %}
 {% if hit.speaker_name is None %}
     <form action="{% url 'chatai:room' room_id %}" method="post">
         {% csrf_token %}
@@ -30,10 +30,23 @@
             <p><input type="radio" name="choice" id="choice2" value="1">换一组搭配</p>
             <p><input type="submit" value="提交" /></p>
         </form>
+        <p>---------------------------------------备忘--------------------------------------------</p>
+        <p><strong>场景构造</strong></p>
+        <img src="{% static 'chatai/speakerDuty1.png' %}" width="400" height="100"/>
+        <p><strong>事件解释</strong></p>
+        <img src="{% static 'chatai/introForEvents.png' %}" width="500" height="300"/>
+        <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>speaker正在创造场景，请等待，完成后再刷新会出现对话页面。</p>
+        <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
 {%elif cur_turn == 0 %}
+        <p>----------------------------------历史对话----------------------------------------</p>
+        {% if history is not None %}
+        {% for item in history %}
+            <li>{{item.text}}</li>
+        {% endfor %}
+        {% endif %}
         {% if hit.speaker_name == name %}
         <p>-----------------------------任务设定（仅speaker可见）----------------------------</p>
         <p>主题：{{conv.scene}}</p>
@@ -58,17 +71,23 @@
             <p>speaker发言：<input type="text" name="speaker_text" style="width:1000px;" /></p>
             <p><input type="submit" value="提交" /></p>
         </form>
+        <p>---------------------------------------备忘--------------------------------------------</p>
+        <p><strong>说话人义务</strong></p>
+        <img src="{% static 'chatai/speakerDuty2.png' %}" width="500" height="150"/>
+        <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>等待speaker说话...过会再来刷新吧~</p>
+        <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
+
+
+{%elif cur_turn == 1 %}
         <p>----------------------------------历史对话----------------------------------------</p>
         {% if history is not None %}
         {% for item in history %}
             <li>{{item.text}}</li>
         {% endfor %}
         {% endif %}
-
-{%elif cur_turn == 1 %}
         {% if hit.listener_name == name %}
         <p>-------------------------------------设置回复-------------------------------------</p>
         <form action="{% url 'chatai:room' room_id %}" method="post">
@@ -79,15 +98,15 @@
             {% endif %}
             <p>listener发言：<input type="text" name="listener_text" /></p>
             <p><input type="submit" value="提交" /></p></form>
+        <p>---------------------------------------备忘--------------------------------------------</p>
+        <p><strong>回复技巧</strong></p>
+        <img src="{% static 'chatai/repStyle.png' %}" width="500" height="600"/>
+        <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>等待listener说话...过会再来刷新吧~</p>
+        <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
-        <p>----------------------------------历史对话----------------------------------------</p>
-        {% if history is not None %}
-        {% for item in history %}
-            <li>{{item.text}}</li>
-        {% endfor %}
-        {% endif %}
+
 
 {%else%}
 {%endif%}

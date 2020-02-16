@@ -158,6 +158,8 @@ def close(request,room_id):
     else:
         if request.POST.get("close", False) == "1" and hit.speaker_name == name:
             conv = get_object_or_404(Conversation, pk=hit.current_conv)
+            conv.speaker_name = hit.speaker_name
+            conv.listener_name = hit.listener_name
             conv.hit = None
             conv.save()
             hit.delete()
@@ -168,6 +170,11 @@ def close(request,room_id):
                             "Hit", "vacant_room")
             return redirect(reverse("chatai:close",kwargs={"room_id":room_id}))
     return render(request, "chatai/close.html", {"result": "无权限收回对话。如果您觉得有权限，可重新登录试试。"})
+def help(request):
+    return render(request,"chatai/help.html")
+def examples(request):
+    return render(request,"chatai/examples.html")
+
 
 
 

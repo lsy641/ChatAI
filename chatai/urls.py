@@ -8,4 +8,6 @@ urlpatterns = [
 	path('<int:room_id>/login/',views.login,name="login"),
 	path('<int:room_id>/verify/',views.verify,name="verify"),
 	path('<int:room_id>/close/',views.close,name="close"),
+	path('help/',views.help,name="help"),
+	path('examples/',views.examples,name="examples"),
 ]
