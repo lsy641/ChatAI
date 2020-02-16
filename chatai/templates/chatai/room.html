@@ -43,7 +43,7 @@
         <p>规则：第一句由speaker开始，最后一句由listener说出。如果speaker觉得对话可以结束了，停止回复，并按下结束按钮。对话不少于10句，不多于20句。</p>
         {% if length is not None %}
         <p>
-            {% if length > 10 %}
+            {% if length > 9 %}
             <form action="{% url 'chatai:close' room_id %}" method="post">
                 {% csrf_token %}
                 当前对话长度：<strong>{{length}}</strong>句。

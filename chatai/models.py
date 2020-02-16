@@ -21,6 +21,8 @@ class Hit(models.Model):
 class Conversation(models.Model):
 	hit = models.ForeignKey(Hit,on_delete=models.CASCADE,null=True,blank=True)
 	utterances = models.ManyToManyField(Utterance)
+	speaker_name = models.CharField(max_length=50,null=True,blank=True)
+	listener_name = models.CharField(max_length=50,null=True,blank=True)
 	scene = models.CharField(max_length=10)
 	emotion = models.CharField(max_length=5)
 	context = models.CharField(max_length=200,null=True,blank=True)
