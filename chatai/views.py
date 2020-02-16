@@ -54,6 +54,7 @@ def room(request,room_id):
             print("speaker:",request.POST.get("speaker_name",False))
             if request.POST.get("speaker_name",False):
                 print("修改speaker")
+                name = request.POST.get("speaker_name",False)
                 hit.speaker_name = request.POST["speaker_name"]
                 hit.save()
                 rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
@@ -62,6 +63,7 @@ def room(request,room_id):
             rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
             if request.POST.get("listener_name", False):
                 print("保存listener_name",request.POST["listener_name"])
+                name = request.POST.get("listener_name", False)
                 hit.listener_name = request.POST["listener_name"]
                 hit.save()
                 rep = render(request, 'chatai/room.html', {"hit": hit, "conv": conv, "room_id": room_id, "name": name})
