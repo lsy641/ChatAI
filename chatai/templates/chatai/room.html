@@ -17,6 +17,7 @@
         </form>
         {%else%}
         <p>你已经成为speaker。请复制链接邀请另一个listner进入房间签名。</p>
+        <script language="JavaScript">setTimeout(function(){location.reload()},20000);</script>
         {%endif%}
 {%elif conv.context is None %}
         {% if hit.speaker_name == name%}
@@ -38,6 +39,7 @@
         <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>speaker正在创造场景，请等待，完成后再刷新会出现对话页面。</p>
+        <script language="JavaScript">setTimeout(function(){location.reload()},5000);</script>
         <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
 {%elif cur_turn == 0 %}
@@ -77,6 +79,7 @@
         <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>等待speaker说话...过会再来刷新吧~</p>
+        <script language="JavaScript">setTimeout(function(){location.reload()},5000);</script>
         <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
 
@@ -104,6 +107,7 @@
         <p><a href="https://docs.qq.com/doc/DYVdmQmFOYVF0a1VG?pub=1&dver=2.1.0" target="_blank">帮助手册---志愿者必读</a></p>
         {%else%}
         <p>等待listener说话...过会再来刷新吧~</p>
+        <script language="JavaScript">setTimeout(function(){location.reload()},5000);</script>
         <form action="{% url 'chatai:room' room_id %}" method="post">{% csrf_token %}<input type="submit" value="刷新" /></form>
         {%endif%}
 
